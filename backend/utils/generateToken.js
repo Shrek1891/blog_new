@@ -1,15 +1,14 @@
 import jwt from "jsonwebtoken";
 
 export const getCookieOptions = (overrides = {}) => {
-    const isDevelopment = process.env.NODE_ENV === 'development';
     const isProduction = process.env.NODE_ENV === 'production';
 
     return {
         httpOnly: true,
         path: '/',
         maxAge: 15 * 24 * 60 * 60 * 1000,
-        secure: isDevelopment,
-        sameSite: isDevelopment ? 'none' : 'lax',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
         ...overrides,
     };
 };

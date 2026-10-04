@@ -28,7 +28,8 @@ const fastify = Fastify({
 const allowedOrigins = (process.env.CORS_ORIGIN ?? '')
     .split(',')
     .map((origin) => origin.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .map((origin) => origin.includes('://') ? origin : `https://${origin}`);
 
 await fastify.register(cors, {
     origin: (origin, cb) => {
@@ -49,20 +50,24 @@ fastify.register(fastifyCookie, {
         httpOnly: true,
         path: '/',
         secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'development' ? 'none' : 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     }
 });
 fastify.register(formbody);
 fastify.register(dbConnector);
+fastify.get('/health', async () => ({status: 'ok'}));
 fastify.register(authRoutes, {prefix: '/api/auth'});
 fastify.register(userRoutes, {prefix: '/api/users'});
 fastify.register(postRoutes, {prefix: '/api/posts'});
-fastify.register(notificationRoutes, {prefix: '/api/notifications'})
+fastify.register(notificationRoutes, {prefix: '/api/notifications'});
 
-fastify.listen({port: 3000}, function (err, address) {
-    if (err) {
-        fastify.log.error(err)
-        process.exit(1)
-    }
-    fastify.log.info(`Server is now listening on ${address}`)
-})
+try {
+    const address = await fastify.listen({
+        port: Number(process.env.PORT) || 3000,
+        host: '0.0.0.0',
+    });
+    fastify.log.info(`Server is now listening on ${address}`);
+} catch (error) {
+    fastify.log.error(error);
+    process.exit(1);
+}

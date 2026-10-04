@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: blog-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://blog-frontend.onrender.com
+
+  - type: static
+    name: blog-frontend
+    plan: free
+    buildCommand: npm ci && npm ci --prefix frontend && npm run build --prefix frontend
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: blog-api
+          property: host
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

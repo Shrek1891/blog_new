@@ -1,4 +1,10 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+const apiUrl = configuredApiUrl || (import.meta.env.DEV ? 'http://127.0.0.1:3000/api' : '/api');
+const apiUrlWithProtocol = /^https?:\/\//i.test(apiUrl) || apiUrl.startsWith('/')
+    ? apiUrl
+    : `${import.meta.env.PROD ? 'https' : 'http'}://${apiUrl}`;
+const normalizedApiUrl = apiUrlWithProtocol.replace(/\/+$/, '');
+const API_BASE_URL = normalizedApiUrl.endsWith('/api') ? normalizedApiUrl : `${normalizedApiUrl}/api`;
 
 export class ApiError extends Error {
     readonly status: number;
