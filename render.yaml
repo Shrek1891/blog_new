@@ -18,11 +18,13 @@ services:
       - key: CORS_ORIGIN
         value: https://blog-frontend.onrender.com
 
-staticSites:
-  - name: blog-frontend
+  # Static site defined inside the services array:
+  - type: web
+    name: blog-frontend
+    env: static
     plan: free
     buildCommand: npm ci && npm ci --prefix frontend && npm run build --prefix frontend
-    publishPath: frontend/dist
+    staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_URL
         fromService:
