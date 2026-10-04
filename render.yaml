@@ -18,9 +18,9 @@ services:
       - key: CORS_ORIGIN
         value: https://blog-frontend.onrender.com
 
-  # Static site configuration:
-  - type: static
+  - type: web
     name: blog-frontend
+    env: static
     buildCommand: npm ci && npm ci --prefix frontend && npm run build --prefix frontend
     staticPublishPath: frontend/dist
     envVars:
